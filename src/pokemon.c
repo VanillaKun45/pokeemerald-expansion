@@ -62,6 +62,8 @@
 #include "constants/songs.h"
 #include "constants/trainers.h"
 #include "constants/union_room.h"
+#include "day_night.h"
+#include "constants/day_night.h"
 #include "constants/weather.h"
 #include "wild_encounter.h"
 
@@ -4522,6 +4524,9 @@ u16 GetEvolutionTargetSpecies(struct Pokemon *mon, enum EvolutionMode mode, u16 
                     targetSpecies = evolutions[i].targetSpecies;
                 break;
             case EVO_FRIENDSHIP_DAY:
+                RtcCalcLocalTime();
+                if (GetCurrentTimeOfDay() != TIME_NIGHT && friendship >= 220)
+                    targetSpecies = gEvolutionTable[species][i].targetSpecies;
                 if (GetTimeOfDay() != TIME_NIGHT && friendship >= FRIENDSHIP_EVO_THRESHOLD)
                     targetSpecies = evolutions[i].targetSpecies;
                 break;
@@ -4530,6 +4535,9 @@ u16 GetEvolutionTargetSpecies(struct Pokemon *mon, enum EvolutionMode mode, u16 
                     targetSpecies = evolutions[i].targetSpecies;
                 break;
             case EVO_FRIENDSHIP_NIGHT:
+                RtcCalcLocalTime();
+                if (GetCurrentTimeOfDay() == TIME_NIGHT && friendship >= 220)
+                    targetSpecies = gEvolutionTable[species][i].targetSpecies;
                 if (GetTimeOfDay() == TIME_NIGHT && friendship >= FRIENDSHIP_EVO_THRESHOLD)
                     targetSpecies = evolutions[i].targetSpecies;
                 break;
