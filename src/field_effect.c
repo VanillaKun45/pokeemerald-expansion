@@ -37,7 +37,7 @@
 #include "constants/metatile_behaviors.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
-#include "constants/map_types.h"
+#include "day_night.h"
 
 #define subsprite_table(ptr) {.subsprites = ptr, .subspriteCount = (sizeof ptr) / (sizeof(struct Subsprite))}
 
@@ -291,6 +291,10 @@ bool8 (*const gFieldEffectScriptFuncs[])(u8 **, u32 *) =
     FieldEffectCmd_loadgfx_callnative,
     FieldEffectCmd_loadtiles_callnative,
     FieldEffectCmd_loadfadedpal_callnative,
+    // Added for day and night system
+    FieldEffectCmd_loadpaldaynight,
+    FieldEffectCmd_loadfadedpaldaynight,
+    FieldEffectCmd_loadfadedpaldaynight_callnative,
 };
 
 static const struct OamData sOam_64x64 =
@@ -3976,68 +3980,39 @@ u8 FldEff_CaveDust(void)
 #undef tMoveSteps
 #undef tObjEventId
 
-static void (*const sUseVsSeekerEffectFuncs[])(struct Task *task) = {
-    UseVsSeeker_StopPlayerMovement,
-    UseVsSeeker_DoPlayerAnimation,
-    UseVsSeeker_ResetPlayerGraphics,
-    UseVsSeeker_CleanUpFieldEffect
-};
-
-u32 FldEff_UseVsSeeker(void)
+bool8 FieldEffectCmd_loadpaldaynight(u8 **script, u32 *val)
 {
-    CreateTask(Task_FldEffUseVsSeeker, 0xFF);
-    return 0;
+    (*script)++;
+    FieldEffectScript_LoadPaletteDayNight(script);
+    return TRUE;
 }
 
-static void Task_FldEffUseVsSeeker(u8 taskId)
+bool8 FieldEffectCmd_loadfadedpaldaynight(u8 **script, u32 *val)
 {
-    sUseVsSeekerEffectFuncs[gTasks[taskId].data[0]](&gTasks[taskId]);
+    (*script)++;
+    FieldEffectScript_LoadFadedPaletteDayNight(script);
+    return TRUE;
 }
 
-static void UseVsSeeker_StopPlayerMovement(struct Task *task)
+bool8 FieldEffectCmd_loadfadedpaldaynight_callnative(u8 **script, u32 *val)
 {
-    LockPlayerFieldControls();
-    FreezeObjectEvents();
-    gPlayerAvatar.preventStep = TRUE;
-    task->data[0]++;
+    (*script)++;
+    FieldEffectScript_LoadFadedPaletteDayNight(script);
+    FieldEffectScript_CallNative(script, val);
+    return TRUE;
 }
 
-static void UseVsSeeker_DoPlayerAnimation(struct Task *task)
+void FieldEffectScript_LoadFadedPaletteDayNight(u8 **script)
 {
-    struct ObjectEvent * playerObj = &gObjectEvents[gPlayerAvatar.objectEventId];
-    if ((ObjectEventIsMovementOverridden(playerObj) && (!(ObjectEventClearHeldMovementIfFinished(playerObj)))))
-        return;
-
-    if (gMapHeader.mapType != MAP_TYPE_UNDERWATER)
-    {
-        SetPlayerAvatarFieldMove();
-        ObjectEventSetHeldMovement(playerObj, MOVEMENT_ACTION_START_ANIM_IN_DIRECTION);
-    }
-    task->data[0]++;
+    struct SpritePalette *palette = (struct SpritePalette *)FieldEffectScript_ReadWord(script);
+    LoadSpritePaletteDayNight(palette);
+    UpdateSpritePaletteWithWeather(IndexOfSpritePaletteTag(palette->tag));
+    (*script) += 4;
 }
 
-static void UseVsSeeker_ResetPlayerGraphics(struct Task *task)
+void FieldEffectScript_LoadPaletteDayNight(u8 **script)
 {
-    struct ObjectEvent* playerObj = &gObjectEvents[gPlayerAvatar.objectEventId];
-
-    if (!ObjectEventClearHeldMovementIfFinished(playerObj))
-        return;
-
-    if (gMapHeader.mapType != MAP_TYPE_UNDERWATER)
-    {
-        ObjectEventSetGraphicsId(&gObjectEvents[gPlayerAvatar.objectEventId], GetPlayerAvatarGraphicsIdByCurrentState());
-        ObjectEventForceSetHeldMovement(playerObj, GetFaceDirectionMovementAction(playerObj->facingDirection));
-    }
-    task->data[0]++;
-}
-
-static void UseVsSeeker_CleanUpFieldEffect(struct Task *task)
-{
-    struct ObjectEvent * playerObj = &gObjectEvents[gPlayerAvatar.objectEventId];
-    if (!ObjectEventClearHeldMovementIfFinished(playerObj))
-        return;
-
-    gPlayerAvatar.preventStep = FALSE;
-    FieldEffectActiveListRemove(FLDEFF_USE_VS_SEEKER);
-    DestroyTask(FindTaskIdByFunc(Task_FldEffUseVsSeeker));
+    struct SpritePalette *palette = (struct SpritePalette *)FieldEffectScript_ReadWord(script);
+    LoadSpritePaletteDayNight(palette);
+    (*script) += 4;
 }
