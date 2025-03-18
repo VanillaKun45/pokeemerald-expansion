@@ -1,0 +1,82 @@
+raw `
+KyoHome_MapScripts::
+	.byte 0
+`
+
+script KyoHome_ProgessJournal {
+    lockall
+		msgbox(JournalText)
+    releaseall
+}
+
+text JournalText {
+    format("I finally got working text and graphics...\p"
+           "Maybe?\p"
+           "It depends on if the player sprites and my boi Whimsicott looks different.\p"
+           "Next, I'll work on a FULLY CUSTOM map. That might be fun.\p Or not.")
+}
+
+script KyoHome_BringWhimsi {
+    lockall
+		showmonpic(SPECIES_WHIMSICOTT,10,3)
+        waitmoncry
+        msgbox("Whimsicott seems happy to see you!\p Would you like to bring it along?",MSGBOX_YESNO)
+            if(var(VAR_RESULT) == YES){
+        givemon(SPECIES_WHIMSICOTT, 50, ITEM_MASTER_BALL)
+        if(var(VAR_RESULT) == MON_GIVEN_TO_PARTY){
+            playfanfare(MUS_EVOLVED)
+            msgbox("Whimsicott joined you!")
+            removeobject(1)
+            setflag(FLAG_UNUSED_0x020)
+            call(NicknamePartyMon)
+        }
+        elif(var(VAR_RESULT) == MON_GIVEN_TO_PC){
+            playfanfare(MUS_EVOLVED)
+            msgbox("Whimsicott joined you!")
+            removeobject(1)
+            setflag(FLAG_UNUSED_0x020)
+            call(NicknameBoxMon)
+        }
+        else{
+            hidemonpic
+            msgbox("No More Room")
+        }
+    }
+    else{
+        hidemonpic
+        msgbox(Whimsi_Denied)
+    }
+    waitmessage
+    releaseall
+    end
+ 
+}
+ 
+script NicknamePartyMon{
+ 
+    msgbox("Give it a nickname?", MSGBOX_YESNO)
+    hidemonpic
+    if(var(VAR_RESULT) == YES){
+        call(Common_EventScript_GetGiftMonPartySlot)
+        call(Common_EventScript_NameReceivedPartyMon)
+    }
+ 
+ 
+}
+ 
+script NicknameBoxMon{
+ 
+    msgbox("Give it a nickname?", MSGBOX_YESNO)
+    hidemonpic
+    if(var(VAR_RESULT) == YES){
+        call(Common_EventScript_NameReceivedBoxMon)
+    }
+    call(Common_EventScript_TransferredToPC)
+ 
+}
+ 
+text Whimsi_Denied{
+    format("Whimsicott is dishearted but understands your decision.")
+}
+
+
