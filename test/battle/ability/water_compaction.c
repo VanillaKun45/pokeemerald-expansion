@@ -5,7 +5,7 @@ SINGLE_BATTLE_TEST("Water Compaction raises Defense 2 stages when hit by a water
 {
     GIVEN {
         ASSUME(GetMoveType(MOVE_WATER_GUN) == TYPE_WATER);
-        PLAYER(SPECIES_SANDYGAST) { Ability(ABILITY_WATER_COMPACTION); }
+        PLAYER(SPECIES_MARACTUS) { Ability(ABILITY_WATER_COMPACTION); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(opponent, MOVE_WATER_GUN); }
@@ -22,20 +22,20 @@ SINGLE_BATTLE_TEST("Water Compaction raises Defense 2 stages on each hit of a mu
     GIVEN {
         ASSUME(GetMoveType(MOVE_SURGING_STRIKES) == TYPE_WATER);
         ASSUME(GetMoveStrikeCount(MOVE_SURGING_STRIKES) == 3);
-        PLAYER(SPECIES_SANDYGAST) { Ability(ABILITY_WATER_COMPACTION); }
+        PLAYER(SPECIES_MARACTUS) { Ability(ABILITY_WATER_COMPACTION); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(opponent, MOVE_SURGING_STRIKES); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SURGING_STRIKES, opponent);
         ABILITY_POPUP(player, ABILITY_WATER_COMPACTION);
-        MESSAGE("Sandygast's Defense sharply rose!");
+        MESSAGE("Maractus's Defense sharply rose!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SURGING_STRIKES, opponent);
         ABILITY_POPUP(player, ABILITY_WATER_COMPACTION);
-        MESSAGE("Sandygast's Defense sharply rose!");
+        MESSAGE("Maractus's Defense sharply rose!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SURGING_STRIKES, opponent);
         ABILITY_POPUP(player, ABILITY_WATER_COMPACTION);
-        MESSAGE("Sandygast's Defense sharply rose!");
+        MESSAGE("Maractus's Defense sharply rose!");
     } THEN {
         EXPECT_EQ(player->statStages[STAT_DEF], DEFAULT_STAT_STAGE + 6);
     }
@@ -48,7 +48,7 @@ SINGLE_BATTLE_TEST("Water Compaction does not affect damage taken from Water typ
     PARAMETRIZE { ability = ABILITY_WATER_COMPACTION; }
     GIVEN {
         ASSUME(GetMoveType(MOVE_WATER_GUN) == TYPE_WATER);
-        PLAYER(SPECIES_SANDYGAST) { Ability(ability); }
+        PLAYER(SPECIES_MARACTUS) { Ability(ability); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(opponent, MOVE_WATER_GUN); }
